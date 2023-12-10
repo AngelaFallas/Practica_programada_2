@@ -7,11 +7,15 @@ library(readr)
 datos_libertad <- read_csv("datos/datos_libertad.csv")
 
 
-ui <- dashboardPage(
-  dashboardHeader(title = "Libertad Dashboard"),
+ui <- dashboardPage(skin = "purple",
+  dashboardHeader(title = "Libertades Mundiales"),
   dashboardSidebar(
-    selectInput("pais_selector", "Seleccionar País", choices = unique(datos_libertad$pais))
+    selectInput("pais_selector", "Seleccionar País", choices = unique(datos_libertad$pais)),
+    sliderInput("rango_anios", "Seleccionar Rango de Años:", min = min(datos_libertad$anio), 
+                max = max(datos_libertad$anio), value = c(min(datos_libertad$anio), 
+                max(datos_libertad$anio)), step = 1)
   ),
+  
   dashboardBody(
     tabBox(
       title = "Libertad en", id = "tab_1",
@@ -26,7 +30,21 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output){
-  
+  output$personal_plot <- renderPlot({
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_personal_puntaje", "libertad_personal_ranking")
+    plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Personal para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
+  output$humana_plot <- renderPlot({
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_humana_puntaje", "libertad_humana_ranking")
+    plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Humana para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
+  output$economica_plot <- renderPlot({
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_economica_puntaje", "libertad_economica_ranking")
+    plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Económica para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
 }
 
 
