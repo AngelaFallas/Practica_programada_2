@@ -20,6 +20,7 @@ ui <- dashboardPage(
                  choices = c("Puntaje" = "puntaje", "Ranking" = "ranking"),
                  selected = "puntaje"),
     downloadButton("descargar_datos", "Descargar Datos")
+
   ),
   dashboardBody(
     tabBox(
@@ -41,16 +42,19 @@ server <- function(input, output) {
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_personal_puntaje", "libertad_personal_ranking")
     plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Personal para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
+
   output$humana_chart <- renderPlot({
     data <- subset(datos_libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_humana_puntaje", "libertad_humana_ranking")
     plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Humana para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
+  
   output$economica_chart <- renderPlot({
     data <- subset(datos_libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_economica_puntaje", "libertad_economica_ranking")
     plot(data$anio, data[[columna]], type = 'l', main = paste("Libertad Económica para", input$pais_selector, "a lo largo del tiempo"), xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
+  
   output$descargar_datos <- downloadHandler(
     filename = function() {
       paste("datos_filtrados_", input$pais_selector, "_", input$tipo_datos, "_", input$rango_anios[1], "_", input$rango_anios[2], ".csv", sep = "")
@@ -82,6 +86,7 @@ server <- function(input, output) {
       zip(file, files_to_zip)
     }
   )
+
 }
 
 shinyApp(ui, server)
